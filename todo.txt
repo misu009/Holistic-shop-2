@@ -1,0 +1,11 @@
+post edit history?
+la post update, sa fie si un preview?
+show category? sau e suficient sa apesi pe edit
+media query pe sidebar admin
+si de facut static sidebaru, practic sa nu se scroleze
+
+de sters pozele atunci cand stergi un record cum ar veni
+
+in tabele, pe td nu sunt pe mijloc valorile
+
+de facut validate ca colaboratorii principali si cei care nu sunt sa fie diferite in create.blade si edit.blade
