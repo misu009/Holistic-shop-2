@@ -9,3 +9,8 @@ de sters pozele atunci cand stergi un record cum ar veni
 in tabele, pe td nu sunt pe mijloc valorile
 
 de facut validate ca colaboratorii principali si cei care nu sunt sa fie diferite in create.blade si edit.blade
+
+de eliminat navbar_links din migratia de settings
+de facut seedingul pentru settings
+
+am instalat composer require laravel/ui --dev:
