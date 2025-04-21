@@ -16,12 +16,17 @@ de facut seedingul pentru settings
 am instalat composer require laravel/ui --dev:
 
 
-
-
-
 al doilea mai mare si de o marime cu al 3
 
 la about-us textarea pentru about-us
 about-us un pic marit pe laptop
 max-height pentru about us 80vh
 de marit pozele de pe shop sa dai click pe ele
+
+de vazut cu videourile din caruselul de la product
+la formularul de contact, de validat emailul
+FORGOT PASSWORD FEATURE
+de adaugat inclusiv pozele la product preview
+de facut preview ul cu modala sau iframe
+
+template uri de pagini cu gdpr etc care vor fi adaugate in footer
