@@ -1,36 +1,26 @@
-# Use an official PHP image with necessary extensions
-FROM php:8.1-fpm
+# Base image with PHP, Composer and Node 18+
+FROM laravelsail/php83-composer AS build
 
-# Set working directory in the container
-WORKDIR /var/www
-
-# Install system dependencies and PHP extensions
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg-dev libfreetype6-dev zip git curl unzip \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql
-
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Install Node.js and npm (for assets)
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
+    git unzip curl libpng-dev libonig-dev libxml2-dev zip libzip-dev \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs
 
-# Copy the existing application directory contents to the container
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy existing application
 COPY . .
 
-# Install Laravel dependencies
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Install front-end dependencies
-RUN npm install && npm run production
+# Install Node modules and build assets
+RUN npm install && npm run build
 
-# Set permissions for storage and cache
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html
 
-# Expose the port the app runs on
-EXPOSE 9000
-
-# Command to run the Laravel app
-CMD ["php-fpm"]
+# Run migrations and seed DB when the container starts
+CMD php artisan migrate:fresh --seed --force && php-fpm
