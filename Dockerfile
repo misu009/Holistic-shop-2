@@ -1,26 +1,38 @@
-# Base image with PHP, Composer and Node 18+
+# Base image with PHP, Composer, and Node 18+
 FROM laravelsail/php83-composer AS build
 
-# Install system dependencies
+# Install system dependencies and Node.js 18
 RUN apt-get update && apt-get install -y \
-    git unzip curl libpng-dev libonig-dev libxml2-dev zip libzip-dev \
+    git unzip curl libpng-dev libonig-dev libxml2-dev zip libzip-dev gnupg \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
+    && apt-get install -y nodejs \
+    && curl -sS https://getcomposer.org/installer | php \
+    && mv composer.phar /usr/local/bin/composer
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy existing application
-COPY . .
-
-# Install PHP dependencies
+# Copy only the essentials first (to cache dependencies)
+COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader
 
-# Install Node modules and build assets
-RUN npm install && npm run build
+COPY package.json package-lock.json ./
+RUN npm install
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html
+# Copy the rest of the app
+COPY . .
 
-# Run migrations and seed DB when the container starts
-CMD php artisan migrate:fresh --seed --force && php-fpm
+# Build frontend assets
+RUN npm run build
+
+# Install Laravel Sail
+RUN curl -s https://laravel.com/installer | php
+
+# Set permissions (only necessary dirs)
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+# Expose port 8000 if using Laravel's built-in server
+EXPOSE 8000
+
+# Run migrations and seed database using Sail (ensure Laravel Sail is installed)
+CMD ./vendor/bin/sail up -d && ./vendor/bin/sail artisan migrate:fresh --seed --force && ./vendor/bin/sail artisan serve --host=0.0.0.0 --port=8000
