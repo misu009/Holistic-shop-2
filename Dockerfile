@@ -3,18 +3,19 @@ FROM laravelsail/php83-composer AS build
 
 # Install system dependencies and Node.js 18
 RUN apt-get update && apt-get install -y \
-    git unzip curl libpng-dev libonig-dev libxml2-dev zip libzip-dev gnupg \
+    git unzip curl libpng-dev libonig-dev libxml2-dev zip libzip-dev libjpeg-dev libfreetype6-dev \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && curl -sS https://getcomposer.org/installer | php \
-    && mv composer.phar /usr/local/bin/composer
+    && mv composer.phar /usr/local/bin/composer \
+    && composer self-update
 
 # Set working directory
 WORKDIR /var/www/html
 
 # Copy only the essentials first (to cache dependencies)
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader -vvv
 
 COPY package.json package-lock.json ./
 RUN npm install
