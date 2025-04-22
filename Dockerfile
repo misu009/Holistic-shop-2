@@ -26,8 +26,9 @@ RUN npm install
 # Build the assets
 RUN npm run build
 
-# Set the correct permissions for the Laravel application
-RUN chown -R www-data:www-data /var/www/html
+# Set the correct permissions for Laravel application directories
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Run migrations, seed the DB, and start the app using Sail
-CMD ./vendor/bin/sail up -d && ./vendor/bin/sail artisan migrate:fresh --seed --force && ./vendor/bin/sail artisan serve --host=0.0.0.0 --port=8000
+# Default command to run when the container starts
+# Will run the migration and seed the database
+CMD ["./vendor/bin/sail", "artisan", "migrate:fresh", "--seed", "--force", "&&", "./vendor/bin/sail", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
