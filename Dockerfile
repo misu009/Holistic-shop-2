@@ -27,7 +27,7 @@ RUN npm install
 RUN npm run build
 
 # Set the correct permissions for the Laravel application
-RUN chown -R www-data:www-data /var/www/html
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Run migrations, seed the DB, and start the app directly without Sail
 CMD php artisan migrate:fresh --seed --force && php artisan serve --host=0.0.0.0 --port=8000
