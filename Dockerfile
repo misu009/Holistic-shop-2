@@ -1,10 +1,13 @@
 # Use the Laravel Sail PHP 8.3 Composer base image
 FROM laravelsail/php83-composer AS build
 
-# Install system dependencies
+# Install system dependencies including PostgreSQL extension
 RUN apt-get update -y && apt-get install -y \
     git unzip curl libpng-dev libonig-dev libxml2-dev zip libzip-dev \
     libjpeg-dev libfreetype6-dev \
+    php-pdo php-pdo-mysql php-mbstring php-xml php-zip \
+    # Install PostgreSQL PHP extensions
+    php-pgsql \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && curl -sS https://getcomposer.org/installer | php \
@@ -27,7 +30,7 @@ RUN npm install
 RUN npm run build
 
 # Set the correct permissions for the Laravel application
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html
 
-# Run migrations, seed the DB, and start the app directly without Sail
+# Run migrations and seed the DB
 CMD php artisan migrate:fresh --seed --force && php artisan serve --host=0.0.0.0 --port=8000
