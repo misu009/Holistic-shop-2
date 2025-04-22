@@ -1,36 +1,42 @@
-# Use the Laravel Sail PHP 8.3 Composer base image
-FROM laravelsail/php83-composer AS build
+# Use the official PHP image with Apache
+FROM php:8.3-apache
 
-# Install system dependencies including PostgreSQL extension
-RUN apt-get update -y && apt-get install -y \
-    git unzip curl libpng-dev libonig-dev libxml2-dev zip libzip-dev \
-    libjpeg-dev libfreetype6-dev \
-    php-pdo php-pdo-mysql php-mbstring php-xml php-zip \
-    # Install PostgreSQL PHP extensions
-    php-pgsql \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git unzip curl libzip-dev zip libpng-dev libonig-dev libxml2-dev \
+    libcurl4-openssl-dev pkg-config libssl-dev \
+    && docker-php-ext-install pdo pdo_mysql zip
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Install Node.js and npm
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
-    && curl -sS https://getcomposer.org/installer | php \
-    && mv composer.phar /usr/local/bin/composer \
-    && composer self-update
+    && npm install -g npm@latest
 
-# Set working directory inside the container
+# Set working directory
 WORKDIR /var/www/html
 
-# Copy existing application to the container
+# Copy app files
 COPY . .
 
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader -vvv
+RUN composer install --no-dev --optimize-autoloader
 
-# Install Node dependencies
-RUN npm install
+# Install Node dependencies and build assets (if using Vite)
+RUN npm install && npm run build
 
-# Build the assets
-RUN npm run build
+# Set correct permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
-# Set the correct permissions for the Laravel application
-RUN chown -R www-data:www-data /var/www/html
+# Expose Apache port
+EXPOSE 80
 
-# Run migrations and seed the DB
-CMD php artisan migrate:fresh --seed --force && php artisan serve --host=0.0.0.0 --port=8000
+# Add script to run migrations, seeders, then serve
+COPY render-start.sh /usr/local/bin/render-start.sh
+RUN chmod +x /usr/local/bin/render-start.sh
+
+# Start the script
+CMD ["/usr/local/bin/render-start.sh"]
