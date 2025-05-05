@@ -25,7 +25,7 @@ class PostFactory extends Factory
             'slug' => fake()->slug(),
             'excerpt' => fake()->sentence(),
             'description' => fake()->paragraph(),
-            'created_by' => User::query()->orderByRaw('RAND()')->value('name'),
+            'created_by' => User::inRandomOrder()->value('name'),
         ];
     }
 
