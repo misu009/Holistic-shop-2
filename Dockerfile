@@ -34,7 +34,7 @@ RUN curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer
 
 # Install PHP dependencies
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN composer install --no-interaction --optimize-autoloader
 
 # Install JS dependencies and compile assets
 RUN npm install && npm run build
